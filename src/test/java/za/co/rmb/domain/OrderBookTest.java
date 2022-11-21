@@ -191,4 +191,16 @@ class OrderBookTest {
 
         assertEquals(3, orders.size());
     }
+
+    @Test
+    public void shouldFindOrdersFor_buyDirection() {
+        OrderBook orderBook = new OrderBook();
+        orderBook.addOrder(new Order(10, 1, Direction.Sell));
+        orderBook.addOrder(new Order(10, 10, Direction.Sell));
+        orderBook.addOrder(new Order(10, 12, Direction.Sell));
+
+        LinkedList<Order> orders = orderBook.findOrderByPriceAndDirection(Direction.Sell, 10.0);
+
+        assertEquals(3, orders.size());
+    }
 }
