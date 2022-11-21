@@ -3,6 +3,8 @@ package za.co.rmb.domain;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrderBookTest {
@@ -178,4 +180,15 @@ class OrderBookTest {
         assertFalse(orderResponse.isOrderFound());
     }
 
+    @Test
+    public void shouldFindOrdersFor_sellDirection() {
+        OrderBook orderBook = new OrderBook();
+        orderBook.addOrder(new Order(10, 1, Direction.Sell));
+        orderBook.addOrder(new Order(10, 10, Direction.Sell));
+        orderBook.addOrder(new Order(10, 12, Direction.Sell));
+
+        LinkedList<Order> orders = orderBook.findOrderByPriceAndDirection(Direction.Sell, 10.0);
+
+        assertEquals(3, orders.size());
+    }
 }
