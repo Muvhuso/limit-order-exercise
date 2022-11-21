@@ -44,6 +44,38 @@ class OrderBookTest {
     }
 
     @Test
+    public void addTwoSellOrders() {
+        OrderBook orderBook = new OrderBook();
+        Order orderOne = new Order(1, 1, Direction.Sell);
+        Order orderResponseOne = orderBook.addOrder(orderOne);
+        Order orderTwo = new Order(1, 1, Direction.Sell);
+        Order orderResponseTwo = orderBook.addOrder(orderTwo);
+
+        FindOrderResponse responseOne = orderBook.findByOrderId(orderResponseOne.getId());
+        FindOrderResponse responseTwo = orderBook.findByOrderId(orderResponseTwo.getId());
+
+        assertNotNull(responseOne.getOrder().getDateTime());
+        assertNotNull(responseTwo.getOrder().getDateTime());
+    }
+
+    @Test
+    public void shouldAdd_sellAndBuyOrders() {
+        OrderBook orderBook = new OrderBook();
+
+        Order orderOne = new Order(1, 1, Direction.Buy);
+        Order orderResponseOne = orderBook.addOrder(orderOne);
+
+        Order orderTwo = new Order(2, 1, Direction.Sell);
+        Order orderResponseTwo = orderBook.addOrder(orderTwo);
+
+        FindOrderResponse orderFoundOne = orderBook.findByOrderId(orderResponseOne.getId());
+        FindOrderResponse orderFoundTwo = orderBook.findByOrderId(orderResponseTwo.getId());
+
+        assertEquals(orderResponseOne.getId(), orderFoundOne.getOrder().getId());
+        assertEquals(orderResponseTwo.getId(), orderFoundTwo.getOrder().getId());
+    }
+
+    @Test
     public void findOrder_shouldRespondRespond_withoutOrder_whenItWasNotCreated() {
         OrderBook orderBook = new OrderBook();
 
