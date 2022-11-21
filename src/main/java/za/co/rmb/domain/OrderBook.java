@@ -27,6 +27,15 @@ public class OrderBook {
         return order;
     }
 
+    public void modifyOrder(UUID orderId, int newQuantity) {
+        FindOrderResponse orderResponse = findByOrderId(orderId);
+        if (orderResponse.isOrderFound()) {
+            Order order = orderResponse.getOrder();
+            order.setQuantity(newQuantity);
+            order.setDateTime(LocalDateTime.now());
+        }
+    }
+
     public FindOrderResponse findByOrderId(UUID orderId) {
         Optional<LinkedList<Order>> optionalOrder = buyMap.values()
                 .stream()

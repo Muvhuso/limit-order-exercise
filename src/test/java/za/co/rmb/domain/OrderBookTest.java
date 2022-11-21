@@ -3,8 +3,6 @@ package za.co.rmb.domain;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.UUID;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrderBookTest {
@@ -57,5 +55,33 @@ class OrderBookTest {
         assertNotNull(response.getOrder());
         assertTrue(response.isOrderFound());
     }
+
+    @Test
+    public void modifyOrder_ShouldUpdate_theQuantityForTheOrder() {
+        OrderBook orderBook = new OrderBook();
+
+        Order orderToAdd = new Order(1, 1, Direction.Buy);
+        Order orderAddedResponse = orderBook.addOrder(orderToAdd);
+
+        orderBook.modifyOrder(orderAddedResponse.getId(), 2);
+
+        FindOrderResponse orderResponse = orderBook.findByOrderId(orderAddedResponse.getId());
+        assertEquals(2, orderResponse.getOrder().getQuantity());
+    }
+
+    @Test
+    public void modifyOrder_ShouldUpdate_theTimeForTheOrder() {
+        OrderBook orderBook = new OrderBook();
+
+        Order orderToAdd = new Order(1, 1, Direction.Buy);
+        Order orderAddedResponse = orderBook.addOrder(orderToAdd);
+
+        orderBook.modifyOrder(orderAddedResponse.getId(), 2);
+
+        FindOrderResponse orderResponse = orderBook.findByOrderId(orderAddedResponse.getId());
+        assertEquals(orderAddedResponse.getDateTime(), orderResponse.getOrder().getDateTime());
+    }
+
+
 
 }
