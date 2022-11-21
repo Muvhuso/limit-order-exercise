@@ -32,6 +32,18 @@ class OrderBookTest {
     }
 
     @Test
+    public void addSellOrder_shouldSucceed() {
+        OrderBook orderBook = new OrderBook();
+
+        Order order = new Order(1, 1, Direction.Sell);
+        Order orderResponse = orderBook.addOrder(order);
+
+        FindOrderResponse response = orderBook.findByOrderId(orderResponse.getId());
+
+        assertNotNull(response.getOrder().getDateTime());
+    }
+
+    @Test
     public void findOrder_shouldRespondRespond_withoutOrder_whenItWasNotCreated() {
         OrderBook orderBook = new OrderBook();
 
