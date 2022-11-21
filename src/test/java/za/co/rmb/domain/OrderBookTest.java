@@ -195,12 +195,27 @@ class OrderBookTest {
     @Test
     public void shouldFindOrdersFor_buyDirection() {
         OrderBook orderBook = new OrderBook();
-        orderBook.addOrder(new Order(10, 1, Direction.Sell));
-        orderBook.addOrder(new Order(10, 10, Direction.Sell));
-        orderBook.addOrder(new Order(10, 12, Direction.Sell));
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+        orderBook.addOrder(new Order(10, 10, Direction.Buy));
+        orderBook.addOrder(new Order(10, 12, Direction.Buy));
+
+        LinkedList<Order> orders = orderBook.findOrderByPriceAndDirection(Direction.Buy, 10.0);
+
+        assertEquals(3, orders.size());
+    }
+
+    @Test
+    public void shouldEnsure_ordersModified_shouldLoosePriority() throws InterruptedException {
+
+        OrderBook orderBook = new OrderBook();
+        Order orderToModify = orderBook.addOrder(new Order(10, 1, Direction.Sell));
+        Order unmodifiedOrder = orderBook.addOrder(new Order(10, 2, Direction.Sell));
+
+        orderBook.modifyOrder(orderToModify.getId(), 10);
 
         LinkedList<Order> orders = orderBook.findOrderByPriceAndDirection(Direction.Sell, 10.0);
 
-        assertEquals(3, orders.size());
+        assertEquals(orders.get(0).getId(), unmodifiedOrder.getId());
+        assertEquals(orders.get(1).getId(), orderToModify.getId());
     }
 }

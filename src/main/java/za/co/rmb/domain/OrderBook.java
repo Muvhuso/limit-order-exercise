@@ -47,6 +47,12 @@ public class OrderBook {
         }
     }
 
+    private static void sortList(LinkedList<Order> orders) {
+        if (orders == null)
+            return;
+        orders.sort(Comparator.comparing(Order::getDateTime));
+    }
+
     public void deleteOrder(UUID orderId) {
         Map<Double, LinkedList<Order>> sellMapResponse = checkIfMapContainsOrder(orderId, sellMap);
         if (sellMapResponse.isEmpty() == false) {
@@ -116,11 +122,15 @@ public class OrderBook {
 
     public LinkedList<Order> findOrderByPriceAndDirection(Direction side, Double price) {
         if (side == Direction.Buy) {
-            return sellMap.get(price);
+            LinkedList<Order> orders = buyMap.get(price);
+            sortList(orders);
+            return orders;
         }
 
         if (side == Direction.Sell) {
-            return sellMap.get(price);
+            LinkedList<Order> orders = sellMap.get(price);
+            sortList(orders);
+            return orders;
         }
 
         return null;
