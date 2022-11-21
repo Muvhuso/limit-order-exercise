@@ -2,9 +2,9 @@ package za.co.rmb.domain;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class OrderBook {
-
     private Map<OrderItemKey, LinkedList<Order>> buyMap;
 
     public OrderBook() {
@@ -34,6 +34,24 @@ public class OrderBook {
             order.setQuantity(newQuantity);
             order.setDateTime(LocalDateTime.now());
         }
+    }
+
+    public void deleteOrder(UUID orderId) {
+        Map<OrderItemKey, LinkedList<Order>> ordersFound = buyMap.entrySet()
+                .stream()
+                .filter(entry -> currentListContainsOrder(entry, orderId))
+                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
+        if (!ordersFound.isEmpty()) {
+            ordersFound.values().stream().forEach(orders -> {
+                orders.removeIf(order -> order.getId().equals(orderId));
+            });
+        }
+    }
+
+    private boolean currentListContainsOrder(Map.Entry<OrderItemKey, LinkedList<Order>> entry, UUID orderId) {
+        return entry.getValue()
+                .stream()
+                .anyMatch(item -> item.getId().equals(orderId));
     }
 
     public FindOrderResponse findByOrderId(UUID orderId) {

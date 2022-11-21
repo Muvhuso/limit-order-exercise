@@ -82,6 +82,17 @@ class OrderBookTest {
         assertEquals(orderAddedResponse.getDateTime(), orderResponse.getOrder().getDateTime());
     }
 
+    @Test
+    public void shouldDeleteAdded_order() {
+        OrderBook orderBook = new OrderBook();
 
+        Order orderToAdd = new Order(1, 1, Direction.Buy);
+        Order orderAddedResponse = orderBook.addOrder(orderToAdd);
+
+        orderBook.deleteOrder(orderAddedResponse.getId());
+
+        FindOrderResponse orderResponse = orderBook.findByOrderId(orderAddedResponse.getId());
+        assertFalse(orderResponse.isOrderFound());
+    }
 
 }
