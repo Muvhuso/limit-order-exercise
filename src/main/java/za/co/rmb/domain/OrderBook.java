@@ -27,7 +27,7 @@ public class OrderBook {
         return order;
     }
 
-    public Order findByOrderId(UUID orderId) {
+    public FindOrderResponse findByOrderId(UUID orderId) {
         Optional<LinkedList<Order>> optionalOrder = buyMap.values()
                 .stream()
                 .filter(o -> orderExistsInList(o, orderId)).findFirst();
@@ -35,15 +35,17 @@ public class OrderBook {
         if (optionalOrder.isPresent()) {
             List<Order> orders = optionalOrder.get();
             if (orders.isEmpty()) {
-                return null;
+                return FindOrderResponse.orderNotFound();
             }
-            return optionalOrder.map(o -> o.stream()
-                            .filter(f -> f.getId().equals(orderId))
-                            .findFirst().get())
-                    .orElse(null);
+            Optional<Order> order = optionalOrder.map(o -> o.stream()
+                    .filter(f -> f.getId().equals(orderId))
+                    .findFirst().get());
+            if (order.isPresent()) {
+                return FindOrderResponse.orderResult(order.get());
+            }
 
         }
-        return null;
+        return FindOrderResponse.orderNotFound();
     }
 
     private boolean orderExistsInList(List<Order> orders, UUID orderId) {
