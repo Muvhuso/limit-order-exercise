@@ -69,7 +69,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void modifyOrder_ShouldUpdate_theQuantityForTheOrder() {
+    public void modifyOrder_ShouldUpdate_buyOrderQuantity() {
         OrderBook orderBook = new OrderBook();
 
         Order orderToAdd = new Order(1, 1, Direction.Buy);
@@ -82,7 +82,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void modifyOrder_ShouldUpdate_theTimeForTheOrder() {
+    public void modifyOrder_ShouldUpdate_buyOrderTime() {
         OrderBook orderBook = new OrderBook();
 
         Order orderToAdd = new Order(1, 1, Direction.Buy);
@@ -92,6 +92,32 @@ class OrderBookTest {
 
         FindOrderResponse orderResponse = orderBook.findByOrderId(orderAddedResponse.getId());
         assertEquals(orderAddedResponse.getDateTime(), orderResponse.getOrder().getDateTime());
+    }
+
+    @Test
+    public void modifyOrder_ShouldUpdate_sellOrderTime() {
+        OrderBook orderBook = new OrderBook();
+
+        Order orderToAdd = new Order(1, 1, Direction.Sell);
+        Order orderAddedResponse = orderBook.addOrder(orderToAdd);
+
+        orderBook.modifyOrder(orderAddedResponse.getId(), 2);
+
+        FindOrderResponse orderResponse = orderBook.findByOrderId(orderAddedResponse.getId());
+        assertEquals(orderAddedResponse.getDateTime(), orderResponse.getOrder().getDateTime());
+    }
+
+    @Test
+    public void modifyOrder_ShouldUpdate_sellOrderQuantity() {
+        OrderBook orderBook = new OrderBook();
+
+        Order orderToAdd = new Order(1, 1, Direction.Sell);
+        Order orderAddedResponse = orderBook.addOrder(orderToAdd);
+
+        orderBook.modifyOrder(orderAddedResponse.getId(), 2);
+
+        FindOrderResponse orderResponse = orderBook.findByOrderId(orderAddedResponse.getId());
+        assertEquals(2, orderResponse.getOrder().getQuantity());
     }
 
     @Test
