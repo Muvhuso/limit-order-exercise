@@ -48,12 +48,25 @@ public class OrderBook {
     }
 
     public void deleteOrder(UUID orderId) {
-        Map<OrderItemKey, LinkedList<Order>> ordersFound = buyMap.entrySet()
+        Map<OrderItemKey, LinkedList<Order>> sellMapResponse = checkIfMapContainsOrder(orderId, sellMap);
+        if (sellMapResponse.isEmpty() == false) {
+            removeElementFromMap(orderId, sellMapResponse);
+        } else {
+            Map<OrderItemKey, LinkedList<Order>> buyMapResponse = checkIfMapContainsOrder(orderId, buyMap);
+            removeElementFromMap(orderId, buyMapResponse);
+        }
+    }
+
+    private Map<OrderItemKey, LinkedList<Order>> checkIfMapContainsOrder(UUID orderId, Map<OrderItemKey, LinkedList<Order>> map) {
+        return map.entrySet()
                 .stream()
                 .filter(entry -> currentListContainsOrder(entry, orderId))
                 .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
-        if (!ordersFound.isEmpty()) {
-            ordersFound.values().stream().forEach(orders -> {
+    }
+
+    private static void removeElementFromMap(UUID orderId, Map<OrderItemKey, LinkedList<Order>> map) {
+        if (!map.isEmpty()) {
+            map.values().stream().forEach(orders -> {
                 orders.removeIf(order -> order.getId().equals(orderId));
             });
         }

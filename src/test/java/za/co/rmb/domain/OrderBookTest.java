@@ -107,4 +107,17 @@ class OrderBookTest {
         assertFalse(orderResponse.isOrderFound());
     }
 
+    @Test
+    public void shouldDeleteAdded_sellOrder() {
+        OrderBook orderBook = new OrderBook();
+
+        Order orderToAdd = new Order(1, 1, Direction.Sell);
+        Order orderAddedResponse = orderBook.addOrder(orderToAdd);
+
+        orderBook.deleteOrder(orderAddedResponse.getId());
+
+        FindOrderResponse orderResponse = orderBook.findByOrderId(orderAddedResponse.getId());
+        assertFalse(orderResponse.isOrderFound());
+    }
+
 }
