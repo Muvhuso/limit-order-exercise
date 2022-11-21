@@ -95,7 +95,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void shouldDeleteAdded_order() {
+    public void shouldDeleteAdded_buyOrder() {
         OrderBook orderBook = new OrderBook();
 
         Order orderToAdd = new Order(1, 1, Direction.Buy);
