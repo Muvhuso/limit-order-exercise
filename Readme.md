@@ -8,4 +8,5 @@ with a comparator. In this specific scenario we require to sort elements by thei
 - When an order is modified the date changes causing this item to lose priority. When 
 we return items based on Sell/Buy we can use a comparator to sort them.
 
-
+### Test cases
+- Assessment 2 exercises test cases have been provided in OrderBookIntegrationTest class
