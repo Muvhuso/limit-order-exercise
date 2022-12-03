@@ -135,4 +135,74 @@ public class OrderBook {
 
         return null;
     }
+
+    public MatchOperationResponse matchOrder() {
+        if (buyMap.isEmpty()) {
+            return MatchOperationResponse.NoBids;
+        }
+        if (sellMap.isEmpty()) {
+            return MatchOperationResponse.NoAsks;
+        }
+
+        for (Map.Entry<Double, LinkedList<Order>> buyEntry: buyMap.entrySet()) {
+            Double currentPrice = buyEntry.getKey();
+
+            Map<Double, LinkedList<Order>> filteredAsks = sellMap.entrySet()
+                    .stream()
+                    .filter(entry -> entry.getKey() <= currentPrice)
+                    .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
+
+            if (filteredAsks.isEmpty()) {
+                return MatchOperationResponse.NoPriceMatch;
+            }
+
+            List<Order> askOrders = filteredAsks.values()
+                    .stream()
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
+            LinkedList<Order> buyOrders = buyEntry.getValue();
+
+            boolean stillMatching = true;
+            while (stillMatching) {
+                if (askOrders.isEmpty()) {
+                    break;
+                }
+                Order askOrder = getHighestPriorityOrder(askOrders);
+                Order buyOrder = getHighestPriorityOrder(buyOrders);
+
+                int requestedBidQuantity = buyOrder.getQuantity();
+                int availableAskQuantity = askOrder.getQuantity();
+
+                if (requestedBidQuantity == availableAskQuantity) {
+                    buyOrder.clearQuantity();
+                    askOrder.clearQuantity();
+                } else if (requestedBidQuantity > availableAskQuantity) {
+                    askOrder.clearQuantity();
+                    buyOrder.setQuantity(requestedBidQuantity - availableAskQuantity);
+                } else {
+                    askOrder.setQuantity(availableAskQuantity - requestedBidQuantity);
+                    buyOrder.clearQuantity();
+                }
+
+                removeProcessedOrder(askOrders, askOrder);
+                removeProcessedOrder(buyOrders, buyOrder);
+
+                if (buyOrders.isEmpty()) {
+                    stillMatching = false;
+                }
+            }
+        }
+
+        return MatchOperationResponse.MatchingCompleted;
+    }
+
+    private static void removeProcessedOrder(List<Order> ordersToRemoveFrom, Order orderToRemove) {
+        if (orderToRemove.isCompleted()) {
+            ordersToRemoveFrom.remove(0);
+        }
+    }
+
+    private static Order getHighestPriorityOrder(List<Order> orders) {
+        return orders.get(0);
+    }
 }

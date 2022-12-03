@@ -2,6 +2,8 @@ package za.co.rmb.domain;
 
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.LinkedList;
 
@@ -217,5 +219,112 @@ class OrderBookTest {
 
         assertEquals(orders.get(0).getId(), unmodifiedOrder.getId());
         assertEquals(orders.get(1).getId(), orderToModify.getId());
+    }
+
+    @Test
+    public void matchOrder_shouldRespondWith_NoBids_whenBids_areNotSet() {
+        OrderBook orderBook = new OrderBook();
+        orderBook.addOrder(new Order(10, 1, Direction.Sell));
+
+        MatchOperationResponse matchOperationResponse = orderBook.matchOrder();
+
+        assertEquals(MatchOperationResponse.NoBids, matchOperationResponse);
+    }
+
+    @Test
+    public void matchOrder_shouldRespondWith_NoAsks_whenAsks_areNotSet() {
+        OrderBook orderBook = new OrderBook();
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+
+        MatchOperationResponse matchOperationResponse = orderBook.matchOrder();
+
+        assertEquals(MatchOperationResponse.NoAsks, matchOperationResponse);
+    }
+
+    @Test
+    public void matchOrder_shouldRespondWith_noPriceMatch_when_BidsHaveNoMatchingAsks() {
+        OrderBook orderBook = new OrderBook();
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+        orderBook.addOrder(new Order(11, 1, Direction.Sell));
+
+        MatchOperationResponse matchOperationResponse = orderBook.matchOrder();
+
+        assertEquals(MatchOperationResponse.NoPriceMatch, matchOperationResponse);
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {10.0, 9.8, 0.1})
+    public void matchOrder_shouldRespondWith_matchingCompleted_when_bidsHaveNoMatchingAsks(Double price) {
+        OrderBook orderBook = new OrderBook();
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+        orderBook.addOrder(new Order(price, 1, Direction.Sell));
+
+        MatchOperationResponse matchOperationResponse = orderBook.matchOrder();
+
+        assertEquals(MatchOperationResponse.MatchingCompleted, matchOperationResponse);
+    }
+
+    @Test
+    public void givenA_successfulMatchCompleted_askOrder_shouldBe_updatedToReflect_utilisedQuantity() {
+        OrderBook orderBook = new OrderBook();
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+        Order order = orderBook.addOrder(new Order(10, 1, Direction.Sell));
+        orderBook.matchOrder();
+
+        FindOrderResponse foundOrder = orderBook.findByOrderId(order.getId());
+
+        assertEquals(0, foundOrder.getOrder().getQuantity());
+    }
+
+    @Test
+    public void matchOrder_canSatisfyBidOrder_fromMoreThanOne_askOrder() {
+        OrderBook orderBook = new OrderBook();
+        Order buyOrder = orderBook.addOrder(new Order(10, 3, Direction.Buy));
+        orderBook.addOrder(new Order(10, 1, Direction.Sell));
+        orderBook.addOrder(new Order(10, 1, Direction.Sell));
+        orderBook.addOrder(new Order(10, 1, Direction.Sell));
+
+        MatchOperationResponse matchOperationResponse = orderBook.matchOrder();
+
+        assertEquals(MatchOperationResponse.MatchingCompleted, matchOperationResponse);
+    }
+
+    @Test
+    public void matchOrder_canSatisfySellOrder_fromMoreThanOne_bidOrder() {
+        OrderBook orderBook = new OrderBook();
+        orderBook.addOrder(new Order(10, 3, Direction.Sell));
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+
+        MatchOperationResponse matchOperationResponse = orderBook.matchOrder();
+
+        assertEquals(MatchOperationResponse.MatchingCompleted, matchOperationResponse);
+    }
+
+    @Test
+    public void matchOrder_shouldRespondWith_buyOrderCompletedBy_availableMatchingAskOrders() {
+        OrderBook orderBook = new OrderBook();
+        Order buyOrder = orderBook.addOrder(new Order(10, 3, Direction.Buy));
+        orderBook.addOrder(new Order(10, 1, Direction.Sell));
+        orderBook.addOrder(new Order(10, 1, Direction.Sell));
+        orderBook.matchOrder();
+
+        FindOrderResponse foundOrder = orderBook.findByOrderId(buyOrder.getId());
+
+        assertEquals(1, foundOrder.getOrder().getQuantity());
+    }
+
+    @Test
+    public void matchOrder_canShouldRespondWith_askOrderCompletedBy_availableMatchingBuyOrders() {
+        OrderBook orderBook = new OrderBook();
+        Order buyOrder = orderBook.addOrder(new Order(10, 3, Direction.Sell));
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+        orderBook.addOrder(new Order(10, 1, Direction.Buy));
+        orderBook.matchOrder();
+
+        FindOrderResponse foundOrder = orderBook.findByOrderId(buyOrder.getId());
+
+        assertEquals(1, foundOrder.getOrder().getQuantity());
     }
 }

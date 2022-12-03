@@ -55,4 +55,12 @@ public class Order {
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
+
+    public void clearQuantity() {
+        quantity = 0;
+    }
+
+    public boolean isCompleted() {
+        return quantity == 0;
+    }
 }
