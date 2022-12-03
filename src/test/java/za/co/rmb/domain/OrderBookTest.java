@@ -40,7 +40,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void addSellOrder_shouldSucceed() {
+    public void addAskOrder_shouldSucceed() {
         var order = new Order(1, 1, Direction.Sell);
         var orderResponse = classUnderTest.addOrder(order);
 
@@ -50,7 +50,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void addTwoSellOrders() {
+    public void addTwoAskOrders() {
         var orderOne = new Order(1, 1, Direction.Sell);
         var orderResponseOne = classUnderTest.addOrder(orderOne);
         var orderTwo = new Order(1, 1, Direction.Sell);
@@ -64,7 +64,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void shouldAdd_sellAndBuyOrders() {
+    public void shouldAdd_askAndBidOrders() {
         var orderOne = new Order(1, 1, Direction.Buy);
         var orderResponseOne = classUnderTest.addOrder(orderOne);
 
@@ -100,7 +100,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void modifyOrder_ShouldUpdate_buyOrderQuantity() {
+    public void modifyOrder_ShouldUpdate_bidOrderQuantity() {
         var orderToAdd = new Order(1, 1, Direction.Buy);
         var orderAddedResponse = classUnderTest.addOrder(orderToAdd);
 
@@ -111,7 +111,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void modifyOrder_ShouldUpdate_buyOrderTime() {
+    public void modifyOrder_ShouldUpdate_bidOrderTime() {
         var orderToAdd = new Order(1, 1, Direction.Buy);
         var orderAddedResponse = classUnderTest.addOrder(orderToAdd);
 
@@ -122,7 +122,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void modifyOrder_ShouldUpdate_sellOrderTime() {
+    public void modifyOrder_ShouldUpdate_askOrderTime() {
         var orderToAdd = new Order(1, 1, Direction.Sell);
         var orderAddedResponse = classUnderTest.addOrder(orderToAdd);
 
@@ -133,7 +133,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void modifyOrder_ShouldUpdate_sellOrderQuantity() {
+    public void modifyOrder_ShouldUpdate_askOrderQuantity() {
         var orderToAdd = new Order(1, 1, Direction.Sell);
         var orderAddedResponse = classUnderTest.addOrder(orderToAdd);
 
@@ -144,7 +144,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void shouldDeleteAdded_buyOrder() {
+    public void shouldDeleteAdded_bidOrder() {
         var orderToAdd = new Order(1, 1, Direction.Buy);
         var orderAddedResponse = classUnderTest.addOrder(orderToAdd);
 
@@ -155,7 +155,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void shouldDeleteAdded_sellOrder() {
+    public void shouldDeleteAdded_askOrder() {
         var orderToAdd = new Order(1, 1, Direction.Sell);
         var orderAddedResponse = classUnderTest.addOrder(orderToAdd);
 
@@ -166,7 +166,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void shouldFindOrdersFor_sellDirection() {
+    public void shouldFindOrdersFor_askDirection() {
         classUnderTest.addOrder(new Order(10, 1, Direction.Sell));
         classUnderTest.addOrder(new Order(10, 10, Direction.Sell));
         classUnderTest.addOrder(new Order(10, 12, Direction.Sell));
@@ -177,7 +177,7 @@ class OrderBookTest {
     }
 
     @Test
-    public void shouldFindOrdersFor_buyDirection() {
+    public void shouldFindOrdersFor_bidDirection() {
         classUnderTest.addOrder(new Order(10, 1, Direction.Buy));
         classUnderTest.addOrder(new Order(10, 10, Direction.Buy));
         classUnderTest.addOrder(new Order(10, 12, Direction.Buy));

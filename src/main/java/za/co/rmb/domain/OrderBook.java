@@ -5,21 +5,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class OrderBook {
-    private final Map<Double, List<Order>> buyMap;
-    private final Map<Double, List<Order>> sellMap;
+    private final Map<Double, List<Order>> bidMap;
+    private final Map<Double, List<Order>> askMap;
     private IMatchOrders matchOrders;
 
     public OrderBook(IMatchOrders matchOrders) {
         this.matchOrders = matchOrders;
-        buyMap = new TreeMap<>(Collections.reverseOrder());
-        sellMap = new TreeMap<>(Collections.reverseOrder());
+        bidMap = new TreeMap<>(Collections.reverseOrder());
+        askMap = new TreeMap<>(Collections.reverseOrder());
     }
 
     public Order addOrder(Order order) {
         if (order.getSide() == Direction.Sell) {
-            addOrder(order, sellMap);
+            addOrder(order, askMap);
         } else {
-            addOrder(order, buyMap);
+            addOrder(order, bidMap);
         }
 
         return order;
@@ -55,12 +55,12 @@ public class OrderBook {
     }
 
     public void deleteOrder(UUID orderId) {
-        Map<Double, List<Order>> sellMapResponse = checkIfMapContainsOrder(orderId, sellMap);
-        if (sellMapResponse.isEmpty() == false) {
-            removeElementFromMap(orderId, sellMapResponse);
+        Map<Double, List<Order>> askMapResponse = checkIfMapContainsOrder(orderId, askMap);
+        if (askMapResponse.isEmpty() == false) {
+            removeElementFromMap(orderId, askMapResponse);
         } else {
-            Map<Double, List<Order>> buyMapResponse = checkIfMapContainsOrder(orderId, buyMap);
-            removeElementFromMap(orderId, buyMapResponse);
+            Map<Double, List<Order>> bidMapResponse = checkIfMapContainsOrder(orderId, bidMap);
+            removeElementFromMap(orderId, bidMapResponse);
         }
     }
 
@@ -86,13 +86,13 @@ public class OrderBook {
     }
 
     public FindOrderResponse findByOrderId(UUID orderId) {
-        Order sellOrder = findOrder(this.sellMap, orderId);
-        if (sellOrder != null) {
-            return FindOrderResponse.orderResult(sellOrder);
+        Order askOrder = findOrder(this.askMap, orderId);
+        if (askOrder != null) {
+            return FindOrderResponse.orderResult(askOrder);
         }
-        Order buyOrder = findOrder(this.buyMap, orderId);
-        if (buyOrder != null) {
-            return FindOrderResponse.orderResult(buyOrder);
+        Order bidOrder = findOrder(this.bidMap, orderId);
+        if (bidOrder != null) {
+            return FindOrderResponse.orderResult(bidOrder);
         }
 
         return FindOrderResponse.orderNotFound();
@@ -123,13 +123,13 @@ public class OrderBook {
 
     public List<Order> findOrderByPriceAndDirection(Direction side, Double price) {
         if (side == Direction.Buy) {
-            List<Order> orders = buyMap.get(price);
+            List<Order> orders = bidMap.get(price);
             sortList(orders);
             return orders;
         }
 
         if (side == Direction.Sell) {
-            List<Order> orders = sellMap.get(price);
+            List<Order> orders = askMap.get(price);
             sortList(orders);
             return orders;
         }
@@ -138,6 +138,6 @@ public class OrderBook {
     }
 
     public MatchOperationResponse match() {
-        return matchOrders.matchOrders(sellMap, buyMap);
+        return matchOrders.matchOrders(askMap, bidMap);
     }
 }
