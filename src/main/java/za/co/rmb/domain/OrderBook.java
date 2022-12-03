@@ -5,11 +5,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class OrderBook {
-    private Map<Double, LinkedList<Order>> buyMap;
-    private Map<Double, LinkedList<Order>> sellMap;
+    private final Map<Double, List<Order>> buyMap;
+    private final Map<Double, List<Order>> sellMap;
 
     public OrderBook() {
-
         buyMap = new TreeMap<>(Collections.reverseOrder());
         sellMap = new TreeMap<>(Collections.reverseOrder());
     }
@@ -24,7 +23,7 @@ public class OrderBook {
         return order;
     }
 
-    private static void addOrder(Order order, Map<Double, LinkedList<Order>> map) {
+    private static void addOrder(Order order, Map<Double, List<Order>> map) {
         LocalDateTime now = LocalDateTime.now();
         order.setDateTime(now);
         order.setId(UUID.randomUUID());
@@ -33,7 +32,7 @@ public class OrderBook {
             orders.add(order);
             map.put(order.getPrice(), orders);
         } else {
-            LinkedList<Order> orders = map.get(order.getPrice());
+            List<Order> orders = map.get(order.getPrice());
             orders.add(order);
         }
     }
@@ -47,30 +46,30 @@ public class OrderBook {
         }
     }
 
-    private static void sortList(LinkedList<Order> orders) {
+    private static void sortList(List<Order> orders) {
         if (orders == null)
             return;
         orders.sort(Comparator.comparing(Order::getDateTime));
     }
 
     public void deleteOrder(UUID orderId) {
-        Map<Double, LinkedList<Order>> sellMapResponse = checkIfMapContainsOrder(orderId, sellMap);
+        Map<Double, List<Order>> sellMapResponse = checkIfMapContainsOrder(orderId, sellMap);
         if (sellMapResponse.isEmpty() == false) {
             removeElementFromMap(orderId, sellMapResponse);
         } else {
-            Map<Double, LinkedList<Order>> buyMapResponse = checkIfMapContainsOrder(orderId, buyMap);
+            Map<Double, List<Order>> buyMapResponse = checkIfMapContainsOrder(orderId, buyMap);
             removeElementFromMap(orderId, buyMapResponse);
         }
     }
 
-    private Map<Double, LinkedList<Order>> checkIfMapContainsOrder(UUID orderId, Map<Double, LinkedList<Order>> map) {
+    private Map<Double, List<Order>> checkIfMapContainsOrder(UUID orderId, Map<Double, List<Order>> map) {
         return map.entrySet()
                 .stream()
                 .filter(entry -> currentListContainsOrder(entry.getValue(), orderId))
                 .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
     }
 
-    private static void removeElementFromMap(UUID orderId, Map<Double, LinkedList<Order>> map) {
+    private static void removeElementFromMap(UUID orderId, Map<Double, List<Order>> map) {
         if (!map.isEmpty()) {
             map.values().stream().forEach(orders -> {
                 orders.removeIf(order -> order.getId().equals(orderId));
@@ -78,7 +77,7 @@ public class OrderBook {
         }
     }
 
-    private boolean currentListContainsOrder(LinkedList<Order> entries, UUID orderId) {
+    private boolean currentListContainsOrder(List<Order> entries, UUID orderId) {
         return entries
                 .stream()
                 .anyMatch(item -> item.getId().equals(orderId));
@@ -97,8 +96,8 @@ public class OrderBook {
         return FindOrderResponse.orderNotFound();
     }
 
-    private Order findOrder(Map<Double, LinkedList<Order>> map, UUID orderId) {
-        Optional<LinkedList<Order>> optionalOrder = map.values()
+    private Order findOrder(Map<Double, List<Order>> map, UUID orderId) {
+        Optional<List<Order>> optionalOrder = map.values()
                 .stream()
                 .filter(o -> orderExistsInList(o, orderId)).findFirst();
 
@@ -120,15 +119,15 @@ public class OrderBook {
         return orders.stream().anyMatch(f -> f.getId().equals(orderId));
     }
 
-    public LinkedList<Order> findOrderByPriceAndDirection(Direction side, Double price) {
+    public List<Order> findOrderByPriceAndDirection(Direction side, Double price) {
         if (side == Direction.Buy) {
-            LinkedList<Order> orders = buyMap.get(price);
+            List<Order> orders = buyMap.get(price);
             sortList(orders);
             return orders;
         }
 
         if (side == Direction.Sell) {
-            LinkedList<Order> orders = sellMap.get(price);
+            List<Order> orders = sellMap.get(price);
             sortList(orders);
             return orders;
         }
@@ -144,10 +143,10 @@ public class OrderBook {
             return MatchOperationResponse.NoAsks;
         }
 
-        for (Map.Entry<Double, LinkedList<Order>> buyEntry: buyMap.entrySet()) {
+        for (Map.Entry<Double, List<Order>> buyEntry: buyMap.entrySet()) {
             Double currentPrice = buyEntry.getKey();
 
-            Map<Double, LinkedList<Order>> filteredAsks = sellMap.entrySet()
+            Map<Double, List<Order>> filteredAsks = sellMap.entrySet()
                     .stream()
                     .filter(entry -> entry.getKey() <= currentPrice)
                     .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue()));
@@ -160,7 +159,7 @@ public class OrderBook {
                     .stream()
                     .flatMap(List::stream)
                     .collect(Collectors.toList());
-            LinkedList<Order> buyOrders = buyEntry.getValue();
+            List<Order> buyOrders = buyEntry.getValue();
 
             boolean stillMatching = true;
             while (stillMatching) {
